@@ -50,7 +50,7 @@ flutter pub get
 
 ⚠️ **必须配置 API Key 才能运行**
 
-请参考 [UNSPLASH_API_SETUP.md](./UNSPLASH_API_SETUP.md) 获取详细配置说明。
+请参考 [Unsplash API 设置文档](./doc/api/UNSPLASH_API_SETUP.md) 获取详细配置说明。
 
 简要步骤：
 1. 访问 [Unsplash Developers](https://unsplash.com/developers) 注册应用
@@ -84,6 +84,14 @@ flutter run
 - ✅ Linux
 - ✅ Windows
 
+## 📚 文档中心
+
+完整的项目文档请访问 [文档中心](./doc/README.md)：
+
+- 📖 [使用说明文档](./doc/guides/) - 功能介绍和开发指南
+- 🔧 [修复文档](./doc/fixes/) - 问题排查和解决方案
+- 🌐 [API 接口文档](./doc/api/) - 第三方服务集成
+
 ## 📄 API 文档
 
 ### UnsplashService 类
@@ -107,7 +115,7 @@ flutter run
 - 已下载图片列表管理
 - 支持删除和清空下载记录
 
-详细使用说明请查看 [DOWNLOAD_FEATURE.md](./DOWNLOAD_FEATURE.md)
+详细使用说明请查看 [下载功能文档](./doc/guides/DOWNLOAD_FEATURE.md)
 
 ## 🎯 已完成功能
 
