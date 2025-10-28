@@ -50,5 +50,9 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>需要访问您的相册以保存壁纸图片</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>需要访问您的相册以管理已下载的壁纸</string>
 </dict>
 </plist>

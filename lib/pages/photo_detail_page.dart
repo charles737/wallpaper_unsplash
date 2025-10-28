@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:photo_view/photo_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:saver_gallery/saver_gallery.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../models/unsplash_photo.dart';
+import 'downloaded_photos_page.dart';
+import 'dart:typed_data';
+// 条件导入：根据平台选择不同的下载实现
+import '../services/download_helper_stub.dart'
+    if (dart.library.html) '../services/download_helper_web.dart';
 
 /// 图片详情页
 ///
@@ -26,6 +36,9 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
 
   /// 大图是否加载完成
   bool _isHighResLoaded = false;
+
+  /// 是否正在下载
+  bool _isDownloading = false;
 
   @override
   void initState() {
@@ -108,6 +121,191 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
     }
   }
 
+  /// 保存图片到相册
+  ///
+  /// 下载高清图片并保存到设备相册
+  ///
+  /// 返回:
+  /// - Future\<void\>
+  Future<void> _savePhoto() async {
+    if (_isDownloading) {
+      debugPrint('图片正在下载中，请稍候');
+      return;
+    }
+
+    setState(() {
+      _isDownloading = true;
+    });
+
+    try {
+      // 显示下载开始提示
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('开始下载图片...'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+
+      // 下载图片
+      final imageUrl = _getPhotoUrl();
+      debugPrint('开始下载图片: $imageUrl');
+
+      final response = await http.get(Uri.parse(imageUrl));
+
+      if (response.statusCode != 200) {
+        throw Exception('下载失败: HTTP ${response.statusCode}');
+      }
+
+      // 文件名
+      final fileName =
+          'wallpaper_${widget.photo.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+      bool success = false;
+
+      // 根据平台选择不同的保存方式
+      if (kIsWeb) {
+        // Web 平台：直接下载文件
+        debugPrint('Web 平台：触发文件下载');
+        success = await DownloadHelper.downloadFile(
+          Uint8List.fromList(response.bodyBytes),
+          fileName,
+        );
+      } else {
+        // 移动平台：保存到相册
+        debugPrint('移动平台：保存到相册');
+        final result = await SaverGallery.saveImage(
+          response.bodyBytes,
+          fileName: fileName,
+          skipIfExists: false,
+          androidRelativePath: 'Pictures/WallpaperUnsplash',
+        );
+        success = result.isSuccess;
+        if (!success) {
+          throw Exception('保存失败: ${result.errorMessage}');
+        }
+      }
+
+      if (success) {
+        // 保存下载记录
+        await _saveDownloadRecord(fileName);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(kIsWeb ? '图片已下载' : '图片已保存到相册'),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+
+        debugPrint('图片已保存: ${widget.photo.id}');
+      } else {
+        throw Exception('保存失败');
+      }
+    } catch (e) {
+      debugPrint('保存图片失败: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('保存失败: ${e.toString()}'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDownloading = false;
+        });
+      }
+    }
+  }
+
+  /// 保存下载记录到本地存储
+  ///
+  /// 参数:
+  /// - [filePath] 保存的文件路径
+  ///
+  /// 返回:
+  /// - Future\<void\>
+  Future<void> _saveDownloadRecord(String? filePath) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final photosJson = prefs.getStringList('downloaded_photos') ?? [];
+
+      // 检查是否已存在
+      final exists = photosJson.any((json) {
+        final item = DownloadedPhoto.fromJson(jsonDecode(json));
+        return item.photo.id == widget.photo.id;
+      });
+
+      if (!exists) {
+        // 添加新记录
+        final downloadedPhoto = DownloadedPhoto(
+          photo: widget.photo,
+          downloadTime: DateTime.now(),
+          savedPath: filePath,
+        );
+
+        photosJson.add(jsonEncode(downloadedPhoto.toJson()));
+        await prefs.setStringList('downloaded_photos', photosJson);
+
+        debugPrint('已保存下载记录: ${widget.photo.id}');
+      } else {
+        debugPrint('下载记录已存在: ${widget.photo.id}');
+      }
+    } catch (e) {
+      debugPrint('保存下载记录失败: $e');
+    }
+  }
+
+  /// 显示更多选项菜单
+  ///
+  /// 返回:
+  /// - void
+  void _showMoreOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.download_outlined),
+                title: const Text('下载图片'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _savePhoto();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.folder_outlined),
+                title: const Text('已下载'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const DownloadedPhotosPage(),
+                    ),
+                  );
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.close),
+                title: const Text('取消'),
+                onTap: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   /// 获取图片 URL (1440p)
   ///
   /// 返回:
@@ -135,19 +333,38 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
                 style: const TextStyle(color: Colors.white),
               ),
               actions: [
+                // 下载按钮
+                _isDownloading
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: Center(
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    : IconButton(
+                        icon: const Icon(Icons.download, color: Colors.white),
+                        onPressed: _savePhoto,
+                        tooltip: '下载',
+                      ),
                 // 分享按钮
                 IconButton(
                   icon: const Icon(Icons.share, color: Colors.white),
                   onPressed: _sharePhoto,
                   tooltip: '分享',
                 ),
-                // 更多选项按钮（预留）
+                // 更多选项按钮
                 IconButton(
                   icon: const Icon(Icons.more_vert, color: Colors.white),
-                  onPressed: () {
-                    debugPrint('更多选项');
-                    // TODO: 显示更多选项（下载、设为壁纸等）
-                  },
+                  onPressed: _showMoreOptions,
                   tooltip: '更多',
                 ),
               ],

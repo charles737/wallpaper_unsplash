@@ -8,6 +8,11 @@
 - 🔄 支持刷新壁纸功能
 - 📱 优雅的 UI 设计
 - 🚫 已关闭 Debug 标签
+- 📂 壁纸分类浏览（自然、建筑、动物等）
+- 🔍 图片详情查看（支持缩放、旋转）
+- 💾 **图片下载保存到相册**
+- 📋 **已下载图片管理**
+- 🔗 图片分享功能
 
 ## 🏗️ 项目结构
 
@@ -15,11 +20,15 @@
 lib/
 ├── main.dart                        # 应用入口
 ├── models/
-│   └── unsplash_photo.dart         # Unsplash 照片数据模型
+│   ├── unsplash_photo.dart         # Unsplash 照片数据模型
+│   └── photo_category.dart         # 照片分类数据模型
 ├── services/
 │   └── unsplash_service.dart       # Unsplash API 服务类
 └── pages/
-    └── welcome_page.dart           # 欢迎页面
+    ├── welcome_page.dart           # 欢迎页面
+    ├── home_page.dart              # 主页（分类浏览）
+    ├── photo_detail_page.dart      # 图片详情页（含下载功能）
+    └── downloaded_photos_page.dart # 已下载图片管理页面
 ```
 
 ## 🚀 快速开始
@@ -59,6 +68,12 @@ flutter run
 - `flutter` - Flutter SDK
 - `http: ^1.2.0` - HTTP 请求库
 - `cupertino_icons: ^1.0.8` - iOS 风格图标
+- `cached_network_image: ^3.3.1` - 网络图片缓存
+- `photo_view: ^0.15.0` - 图片查看和缩放
+- `share_plus: ^10.1.2` - 分享功能
+- `saver_gallery: ^3.0.6` - 保存图片到相册
+- `shared_preferences: ^2.3.3` - 本地数据存储
+- `permission_handler: ^11.3.1` - 权限管理
 
 ## 📱 支持平台
 
@@ -81,13 +96,35 @@ flutter run
 
 详细文档请查看代码注释。
 
-## 🎯 待开发功能
+## 💾 下载功能
 
-- [ ] 壁纸浏览和搜索
+应用支持将高清壁纸保存到设备相册，并提供已下载图片的管理功能。
+
+**主要特性：**
+- 下载 1440p 高清图片（2560x1440）
+- 自动保存到系统相册
+- 下载进度提示
+- 已下载图片列表管理
+- 支持删除和清空下载记录
+
+详细使用说明请查看 [DOWNLOAD_FEATURE.md](./DOWNLOAD_FEATURE.md)
+
+## 🎯 已完成功能
+
+- ✅ 壁纸分类浏览
+- ✅ 图片详情查看（缩放、旋转）
+- ✅ 图片下载保存
+- ✅ 已下载图片管理
+- ✅ 图片分享功能
+
+## 🚧 待开发功能
+
+- [ ] 壁纸搜索功能
 - [ ] 壁纸收藏功能
-- [ ] 壁纸下载功能
-- [ ] 分类浏览
+- [ ] 设置为壁纸
+- [ ] 批量下载
 - [ ] 个人收藏集
+- [ ] 选择下载质量
 
 ## 📝 许可证
 
