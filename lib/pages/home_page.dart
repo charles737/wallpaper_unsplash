@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:cached_network_image/cached_network_image.dart';
 import '../services/unsplash_service.dart';
 import '../models/unsplash_photo.dart';
@@ -136,25 +138,63 @@ class _HomePageState extends State<HomePage> {
     _loadPhotos(refresh: true);
   }
 
+  /// 判断是否为桌面平台
+  ///
+  /// 返回:
+  /// - bool 是否为桌面平台（Web、macOS、Windows）
+  bool get _isDesktopPlatform {
+    if (kIsWeb) return true;
+    return defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux;
+  }
+
   /// 计算网格列数
   ///
   /// 参数:
   /// - [context] BuildContext 上下文
   ///
   /// 返回:
-  /// - int 列数（最少3列）
+  /// - int 列数
+  /// - 移动端：根据屏幕宽度动态计算，最少 2 列
+  /// - 桌面端：固定 3 列
   int _calculateCrossAxisCount(BuildContext context) {
+    // 桌面平台（Web、macOS、Windows）固定显示 3 列
+    if (_isDesktopPlatform) {
+      return 3;
+    }
+
+    // 移动平台根据屏幕宽度动态计算
     final screenWidth = MediaQuery.of(context).size.width;
-    // 每个图片最小宽度 120，最少 3 列
-    final count = (screenWidth / 120).floor();
-    return count < 3 ? 3 : count;
+    // 每个图片最小宽度 150，最少 2 列
+    final count = (screenWidth / 150).floor();
+    return count < 2 ? 2 : count;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('壁纸工具'),
+        title: ShaderMask(
+          shaderCallback: (bounds) => const LinearGradient(
+            colors: [
+              Color(0xFF667EEA), // 紫蓝色
+              Color(0xFF764BA2), // 深紫色
+              Color(0xFFF093FB), // 粉紫色
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ).createShader(bounds),
+          child: const Text(
+            'WallpaperUnsplash',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
+              color: Colors.white,
+            ),
+          ),
+        ),
         centerTitle: true,
         elevation: 0,
       ),
@@ -180,7 +220,7 @@ class _HomePageState extends State<HomePage> {
   /// - Widget 分类按钮栏组件
   Widget _buildCategoryBar() {
     return Container(
-      height: 50,
+      height: 60,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -191,28 +231,59 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      child: ListView.builder(
+      child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         itemCount: PhotoCategory.categories.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final category = PhotoCategory.categories[index];
           final isSelected = _selectedCategory.id == category.id;
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-            child: ChoiceChip(
-              label: Text(category.name),
-              selected: isSelected,
-              onSelected: (_) => _onCategoryChanged(category),
-              selectedColor: Theme.of(context).primaryColor,
-              labelStyle: TextStyle(
-                color: isSelected ? Colors.white : Colors.black87,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-          );
+          return _buildCategoryButton(category, isSelected);
         },
+      ),
+    );
+  }
+
+  /// 构建单个分类按钮
+  ///
+  /// 参数:
+  /// - [category] PhotoCategory 分类对象
+  /// - [isSelected] bool 是否选中
+  ///
+  /// 返回:
+  /// - Widget 分类按钮组件
+  Widget _buildCategoryButton(PhotoCategory category, bool isSelected) {
+    return Material(
+      color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade100,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: () => _onCategoryChanged(category),
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected
+                  ? Theme.of(context).primaryColor
+                  : Colors.grey.shade300,
+              width: 1.5,
+            ),
+          ),
+          child: Text(
+            category.name,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black87,
+              fontSize: 15,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              letterSpacing: 0.3,
+            ),
+            overflow: TextOverflow.visible,
+            maxLines: 1,
+          ),
+        ),
       ),
     );
   }
@@ -223,17 +294,21 @@ class _HomePageState extends State<HomePage> {
   /// - Widget 照片网格组件
   Widget _buildPhotoGrid() {
     final crossAxisCount = _calculateCrossAxisCount(context);
+    // 桌面端使用更大的间距和宽高比
+    final spacing = _isDesktopPlatform ? 12.0 : 4.0;
+    final padding = _isDesktopPlatform ? 16.0 : 4.0;
+    final childAspectRatio = _isDesktopPlatform ? 0.75 : 1.0;
 
     return RefreshIndicator(
       onRefresh: () => _loadPhotos(refresh: true),
       child: GridView.builder(
         controller: _scrollController,
-        padding: const EdgeInsets.all(4),
+        padding: EdgeInsets.all(padding),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
-          crossAxisSpacing: 4,
-          mainAxisSpacing: 4,
-          childAspectRatio: 1.0, // 正方形
+          crossAxisSpacing: spacing,
+          mainAxisSpacing: spacing,
+          childAspectRatio: childAspectRatio,
         ),
         itemCount: _photos.length + (_hasMore ? 1 : 0),
         itemBuilder: (context, index) {
@@ -261,6 +336,11 @@ class _HomePageState extends State<HomePage> {
   /// 返回:
   /// - Widget 照片项组件
   Widget _buildPhotoItem(UnsplashPhoto photo) {
+    // 桌面端添加圆角和阴影
+    final borderRadius = _isDesktopPlatform
+        ? BorderRadius.circular(12)
+        : BorderRadius.zero;
+
     return GestureDetector(
       onTap: () {
         debugPrint('点击照片: ${photo.id}');
@@ -272,18 +352,35 @@ class _HomePageState extends State<HomePage> {
       },
       child: Hero(
         tag: photo.id,
-        child: CachedNetworkImage(
-          imageUrl: '${photo.urls.small}&w=208&h=208&fit=crop',
-          fit: BoxFit.cover,
-          placeholder: (context, url) => Container(
-            color: Colors.grey[200],
-            child: const Center(
-              child: CircularProgressIndicator(strokeWidth: 2),
+        child: Container(
+          decoration: _isDesktopPlatform
+              ? BoxDecoration(
+                  borderRadius: borderRadius,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                )
+              : null,
+          child: ClipRRect(
+            borderRadius: borderRadius,
+            child: CachedNetworkImage(
+              imageUrl: '${photo.urls.small}&w=400&h=600&fit=crop',
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
+                color: Colors.grey[200],
+                child: const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+              errorWidget: (context, url, error) => Container(
+                color: Colors.grey[300],
+                child: const Icon(Icons.error, color: Colors.grey),
+              ),
             ),
-          ),
-          errorWidget: (context, url, error) => Container(
-            color: Colors.grey[300],
-            child: const Icon(Icons.error, color: Colors.grey),
           ),
         ),
       ),

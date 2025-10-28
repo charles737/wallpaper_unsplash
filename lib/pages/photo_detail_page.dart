@@ -386,25 +386,37 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // 底层：小图占位符（仅在大图未加载完成时显示）
+        // 第一层：纯黑色背景（始终存在，确保没有任何透明区域）
+        Container(color: Colors.black),
+
+        // 第二层：小图占位符（仅在大图未加载完成时显示）
         if (!_isHighResLoaded)
           Hero(
-            tag: widget.photo.id,
+            tag: '${widget.photo.id}_placeholder',
             child: CachedNetworkImage(
-              imageUrl: '${widget.photo.urls.small}&w=208&h=208&fit=crop',
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Container(color: Colors.black),
+              // 使用与主页相同的 URL，确保命中缓存，立即显示
+              imageUrl: '${widget.photo.urls.small}&w=400&h=600&fit=crop',
+              fit: BoxFit.contain, // 保持宽高比，居中显示
+              placeholder: (context, url) => Center(
+                child: CircularProgressIndicator(
+                  color: Colors.white.withOpacity(0.5),
+                  strokeWidth: 2,
+                ),
+              ),
+              errorWidget: (context, url, error) =>
+                  Container(color: Colors.black),
             ),
           ),
 
-        // 上层：高清大图 PhotoView
+        // 第三层：高清大图 PhotoView
         Hero(
-          tag: _isHighResLoaded ? widget.photo.id : '${widget.photo.id}_high',
+          tag: widget.photo.id,
           child: PhotoView(
             imageProvider: CachedNetworkImageProvider(_getPhotoUrl()),
             controller: _photoViewController,
-            backgroundDecoration: BoxDecoration(
-              color: _isHighResLoaded ? Colors.black : Colors.transparent,
+            backgroundDecoration: const BoxDecoration(
+              // 始终透明，让底层的黑色背景显示出来
+              color: Colors.transparent,
             ),
             // 最小缩放倍数
             minScale: PhotoViewComputedScale.contained,
@@ -414,31 +426,33 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
             initialScale: PhotoViewComputedScale.contained,
             // 启用旋转
             enableRotation: true,
-            // 加载状态 - 优化显示
+            // 加载状态 - 显示加载进度
             loadingBuilder: (context, event) {
+              // 计算加载进度（0.0 - 1.0）
+              final loadProgress = event == null
+                  ? 0.0
+                  : event.cumulativeBytesLoaded /
+                        (event.expectedTotalBytes ?? 1);
+
               // 计算加载进度百分比（整数）
-              final progress = event == null
-                  ? 0
-                  : ((event.cumulativeBytesLoaded /
-                                (event.expectedTotalBytes ?? 1)) *
-                            100)
-                        .toInt();
+              final progressPercent = (loadProgress * 100).toInt();
 
               // 检测加载完成
               if (event != null &&
                   event.expectedTotalBytes != null &&
                   event.cumulativeBytesLoaded >= event.expectedTotalBytes!) {
-                // 延迟设置状态，避免在 build 过程中调用 setState
+                // 加载完成后隐藏小图
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted && !_isHighResLoaded) {
                     setState(() {
                       _isHighResLoaded = true;
                     });
-                    debugPrint('大图加载完成，已替换小图');
+                    debugPrint('高清图加载完成，隐藏小图占位');
                   }
                 });
               }
 
+              // 显示加载进度指示器
               return Center(
                 child: SizedBox(
                   width: 60,
@@ -448,16 +462,13 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
                     children: [
                       // 转圈动画（粗线条）
                       CircularProgressIndicator(
-                        value: event == null
-                            ? null
-                            : event.cumulativeBytesLoaded /
-                                  (event.expectedTotalBytes ?? 1),
+                        value: event == null ? null : loadProgress,
                         strokeWidth: 4.0,
                         color: Colors.white,
                       ),
                       // 百分比显示在中间
                       Text(
-                        '$progress%',
+                        '$progressPercent%',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
