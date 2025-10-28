@@ -3,13 +3,17 @@ import 'package:flutter/foundation.dart'
     show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:cached_network_image/cached_network_image.dart';
 import '../services/unsplash_service.dart';
+import '../services/theme_manager.dart';
 import '../models/unsplash_photo.dart';
 import '../models/photo_category.dart';
 import 'photo_detail_page.dart';
 
 /// 首页 - 图片墙界面
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  /// 主题管理器
+  final ThemeManager themeManager;
+
+  const HomePage({super.key, required this.themeManager});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -197,6 +201,20 @@ class _HomePageState extends State<HomePage> {
         ),
         centerTitle: true,
         elevation: 0,
+        actions: [
+          // 主题切换按钮
+          IconButton(
+            icon: Icon(
+              widget.themeManager.themeMode == ThemeMode.dark
+                  ? Icons.light_mode
+                  : widget.themeManager.themeMode == ThemeMode.light
+                  ? Icons.dark_mode
+                  : Icons.brightness_auto,
+            ),
+            onPressed: () => widget.themeManager.toggleThemeMode(),
+            tooltip: '切换主题',
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -206,7 +224,11 @@ class _HomePageState extends State<HomePage> {
           // 图片网格
           Expanded(
             child: _photos.isEmpty && _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(
+                    child: CircularProgressIndicator(
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  )
                 : _buildPhotoGrid(),
           ),
         ],
@@ -222,7 +244,7 @@ class _HomePageState extends State<HomePage> {
     return Container(
       height: 60,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -255,36 +277,32 @@ class _HomePageState extends State<HomePage> {
   /// 返回:
   /// - Widget 分类按钮组件
   Widget _buildCategoryButton(PhotoCategory category, bool isSelected) {
-    return Material(
-      color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade100,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: () => _onCategoryChanged(category),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return FilterChip(
+      label: Text(category.name),
+      selected: isSelected,
+      onSelected: (selected) => _onCategoryChanged(category),
+      selectedColor: Theme.of(context).primaryColor,
+      backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+      labelStyle: TextStyle(
+        color: isSelected
+            ? Colors.white
+            : (isDark ? Colors.white : Colors.black87),
+        fontSize: 15,
+        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+        letterSpacing: 0.3,
+      ),
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isSelected
-                  ? Theme.of(context).primaryColor
-                  : Colors.grey.shade300,
-              width: 1.5,
-            ),
-          ),
-          child: Text(
-            category.name,
-            style: TextStyle(
-              color: isSelected ? Colors.white : Colors.black87,
-              fontSize: 15,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              letterSpacing: 0.3,
-            ),
-            overflow: TextOverflow.visible,
-            maxLines: 1,
-          ),
+        side: BorderSide(
+          color: isSelected
+              ? Theme.of(context).primaryColor
+              : (isDark ? Colors.grey.shade700 : Colors.grey.shade300),
+          width: 1.5,
         ),
       ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     );
   }
 
@@ -314,10 +332,12 @@ class _HomePageState extends State<HomePage> {
         itemBuilder: (context, index) {
           if (index == _photos.length) {
             // 加载更多指示器
-            return const Center(
+            return Center(
               child: Padding(
-                padding: EdgeInsets.all(16),
-                child: CircularProgressIndicator(),
+                padding: const EdgeInsets.all(16),
+                child: CircularProgressIndicator(
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
             );
           }
@@ -346,7 +366,10 @@ class _HomePageState extends State<HomePage> {
         debugPrint('点击照片: ${photo.id}');
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => PhotoDetailPage(photo: photo),
+            builder: (context) => PhotoDetailPage(
+              photo: photo,
+              themeManager: widget.themeManager,
+            ),
           ),
         );
       },
@@ -368,12 +391,17 @@ class _HomePageState extends State<HomePage> {
           child: ClipRRect(
             borderRadius: borderRadius,
             child: CachedNetworkImage(
-              imageUrl: '${photo.urls.small}&w=400&h=600&fit=crop',
+              imageUrl: '${photo.urls.small}&w=208&h=288&fit=crop',
               fit: BoxFit.cover,
               placeholder: (context, url) => Container(
-                color: Colors.grey[200],
-                child: const Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey[800]
+                    : Colors.grey[200],
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Theme.of(context).primaryColor,
+                  ),
                 ),
               ),
               errorWidget: (context, url, error) => Container(

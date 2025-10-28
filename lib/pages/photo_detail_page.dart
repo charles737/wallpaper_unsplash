@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../models/unsplash_photo.dart';
+import '../services/theme_manager.dart';
 import 'downloaded_photos_page.dart';
 import 'dart:typed_data';
 // 条件导入：根据平台选择不同的下载实现
@@ -21,7 +22,14 @@ class PhotoDetailPage extends StatefulWidget {
   /// 照片对象
   final UnsplashPhoto photo;
 
-  const PhotoDetailPage({super.key, required this.photo});
+  /// 主题管理器
+  final ThemeManager themeManager;
+
+  const PhotoDetailPage({
+    super.key,
+    required this.photo,
+    required this.themeManager,
+  });
 
   @override
   State<PhotoDetailPage> createState() => _PhotoDetailPageState();
@@ -288,7 +296,9 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
                   Navigator.of(context).pop();
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => const DownloadedPhotosPage(),
+                      builder: (context) => DownloadedPhotosPage(
+                        themeManager: widget.themeManager,
+                      ),
                     ),
                   );
                 },
@@ -333,10 +343,23 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
                 style: const TextStyle(color: Colors.white),
               ),
               actions: [
+                // 主题切换按钮
+                IconButton(
+                  icon: Icon(
+                    widget.themeManager.themeMode == ThemeMode.dark
+                        ? Icons.light_mode
+                        : widget.themeManager.themeMode == ThemeMode.light
+                        ? Icons.dark_mode
+                        : Icons.brightness_auto,
+                    color: Colors.white,
+                  ),
+                  onPressed: () => widget.themeManager.toggleThemeMode(),
+                  tooltip: '切换主题',
+                ),
                 // 下载按钮
                 _isDownloading
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12),
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Center(
                           child: SizedBox(
                             width: 24,
@@ -344,7 +367,7 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
+                                Theme.of(context).primaryColor,
                               ),
                             ),
                           ),
@@ -395,11 +418,11 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
             tag: '${widget.photo.id}_placeholder',
             child: CachedNetworkImage(
               // 使用与主页相同的 URL，确保命中缓存，立即显示
-              imageUrl: '${widget.photo.urls.small}&w=400&h=600&fit=crop',
+              imageUrl: '${widget.photo.urls.small}&w=208&h=288&fit=crop',
               fit: BoxFit.contain, // 保持宽高比，居中显示
               placeholder: (context, url) => Center(
                 child: CircularProgressIndicator(
-                  color: Colors.white.withOpacity(0.5),
+                  color: Theme.of(context).primaryColor,
                   strokeWidth: 2,
                 ),
               ),
@@ -464,7 +487,7 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
                       CircularProgressIndicator(
                         value: event == null ? null : loadProgress,
                         strokeWidth: 4.0,
-                        color: Colors.white,
+                        color: Theme.of(context).primaryColor,
                       ),
                       // 百分比显示在中间
                       Text(

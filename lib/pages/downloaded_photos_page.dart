@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../models/unsplash_photo.dart';
+import '../services/theme_manager.dart';
 import 'photo_detail_page.dart';
 
 /// 已下载图片页面
 ///
 /// 显示所有已下载的图片，支持查看和删除
 class DownloadedPhotosPage extends StatefulWidget {
-  const DownloadedPhotosPage({super.key});
+  /// 主题管理器
+  final ThemeManager themeManager;
+
+  const DownloadedPhotosPage({super.key, required this.themeManager});
 
   @override
   State<DownloadedPhotosPage> createState() => _DownloadedPhotosPageState();
@@ -144,7 +148,9 @@ class _DownloadedPhotosPageState extends State<DownloadedPhotosPage> {
   /// - Widget 页面主体组件
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(color: Theme.of(context).primaryColor),
+      );
     }
 
     if (_downloadedPhotos.isEmpty) {
@@ -201,7 +207,10 @@ class _DownloadedPhotosPageState extends State<DownloadedPhotosPage> {
           // 点击查看图片详情
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => PhotoDetailPage(photo: photo),
+              builder: (context) => PhotoDetailPage(
+                photo: photo,
+                themeManager: widget.themeManager,
+              ),
             ),
           );
         },

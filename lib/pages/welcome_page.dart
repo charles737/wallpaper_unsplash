@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import '../services/unsplash_service.dart';
+import '../services/theme_manager.dart';
 import '../models/unsplash_photo.dart';
 
 /// 欢迎页面
 /// 显示随机 Unsplash 图片作为背景，提供确认按钮进入首页
 class WelcomePage extends StatefulWidget {
-  const WelcomePage({super.key});
+  /// 主题管理器
+  final ThemeManager themeManager;
+
+  const WelcomePage({super.key, required this.themeManager});
 
   @override
   State<WelcomePage> createState() => _WelcomePageState();
@@ -96,8 +100,10 @@ class _WelcomePageState extends State<WelcomePage> {
     if (_isLoading) {
       return Container(
         color: Colors.grey[900],
-        child: const Center(
-          child: CircularProgressIndicator(color: Colors.white),
+        child: Center(
+          child: CircularProgressIndicator(
+            color: Theme.of(context).primaryColor,
+          ),
         ),
       );
     }
@@ -139,7 +145,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     ? loadingProgress.cumulativeBytesLoaded /
                           loadingProgress.expectedTotalBytes!
                     : null,
-                color: Colors.white,
+                color: Theme.of(context).primaryColor,
               ),
             ),
           );
@@ -182,6 +188,12 @@ class _WelcomePageState extends State<WelcomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // 主题切换按钮
+            Align(
+              alignment: Alignment.topRight,
+              child: _buildThemeToggleButton(),
+            ),
+
             const Spacer(),
 
             // 欢迎内容
@@ -244,6 +256,30 @@ class _WelcomePageState extends State<WelcomePage> {
     );
   }
 
+  /// 构建主题切换按钮
+  Widget _buildThemeToggleButton() {
+    return Material(
+      color: Colors.black.withValues(alpha: 0.3),
+      borderRadius: BorderRadius.circular(25),
+      child: InkWell(
+        onTap: () => widget.themeManager.toggleThemeMode(),
+        borderRadius: BorderRadius.circular(25),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          child: Icon(
+            widget.themeManager.themeMode == ThemeMode.dark
+                ? Icons.light_mode
+                : widget.themeManager.themeMode == ThemeMode.light
+                ? Icons.dark_mode
+                : Icons.brightness_auto,
+            color: Colors.white,
+            size: 24,
+          ),
+        ),
+      ),
+    );
+  }
+
   /// 构建刷新按钮
   Widget _buildRefreshButton() {
     return Material(
@@ -255,12 +291,12 @@ class _WelcomePageState extends State<WelcomePage> {
         child: Container(
           padding: const EdgeInsets.all(8),
           child: _isLoading
-              ? const SizedBox(
+              ? SizedBox(
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Colors.white,
+                    color: Theme.of(context).primaryColor,
                   ),
                 )
               : const Icon(Icons.refresh, color: Colors.white, size: 20),
@@ -296,8 +332,8 @@ class _WelcomePageState extends State<WelcomePage> {
     return ElevatedButton(
       onPressed: _enterHomePage,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         elevation: 8,
