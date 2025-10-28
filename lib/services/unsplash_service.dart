@@ -202,6 +202,68 @@ class UnsplashService {
     }
   }
 
+  /// 获取照片列表
+  ///
+  /// 参数:
+  /// - [page] int 页码（默认 1）
+  /// - [perPage] int 每页数量（默认 30，最大 30）
+  /// - [orderBy] String 排序方式（latest/oldest/popular，默认 latest）
+  ///
+  /// 返回:
+  /// - Future\<List\<UnsplashPhoto\>\> 返回照片列表
+  ///
+  /// 异常:
+  /// - Exception 如果 API 请求失败或响应解析错误
+  ///
+  /// 示例:
+  /// ```dart
+  /// final service = UnsplashService();
+  /// final photos = await service.getPhotos(page: 1, perPage: 30);
+  /// ```
+  Future<List<UnsplashPhoto>> getPhotos({
+    int page = 1,
+    int perPage = 30,
+    String orderBy = 'latest',
+  }) async {
+    try {
+      final queryParams = {
+        'page': page.toString(),
+        'per_page': perPage.toString(),
+        'order_by': orderBy,
+      };
+
+      final uri = Uri.parse(
+        '$_baseUrl/photos',
+      ).replace(queryParameters: queryParams);
+
+      // 发送 HTTP GET 请求
+      final response = await _client.get(
+        uri,
+        headers: {
+          'Authorization': 'Client-ID $_accessKey',
+          'Accept-Version': 'v1',
+        },
+      );
+
+      // 检查响应状态
+      if (response.statusCode == 200) {
+        // 解析 JSON 数据
+        final jsonData = json.decode(response.body) as List<dynamic>;
+
+        return jsonData
+            .map((json) => UnsplashPhoto.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception(
+          'Failed to load photos. Status code: ${response.statusCode}, '
+          'Message: ${response.body}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Error fetching photos: $e');
+    }
+  }
+
   /// 关闭 HTTP 客户端
   /// 在不再需要服务时调用以释放资源
   void dispose() {

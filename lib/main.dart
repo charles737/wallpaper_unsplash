@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'pages/welcome_page.dart';
+import 'pages/home_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Wallpaper Unsplash',
+      title: '壁纸工具',
       debugShowCheckedModeBanner: false, // 关闭 debug 标签
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const WelcomePage(),
-        '/home': (context) => const MyHomePage(title: 'Wallpaper Unsplash'),
+        '/home': (context) => const HomePage(),
       },
     );
   }
