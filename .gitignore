@@ -43,3 +43,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# macOS DMG build artifacts
+*.dmg
+build/macos/dmg/
+build/macos/*_temp.dmg

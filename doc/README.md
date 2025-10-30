@@ -14,6 +14,7 @@
 - [**图片详情页**](./guides/PHOTO_DETAIL_PAGE.md) - 图片详情页功能说明
 - [**下载功能**](./guides/DOWNLOAD_FEATURE.md) - 图片下载和保存功能
 - [**实现总结**](./guides/IMPLEMENTATION_SUMMARY.md) - 项目实现技术总结
+- [**macOS DMG 构建指南**](./guides/BUILD_DMG_GUIDE.md) - macOS 安装包构建教程
 
 ### 🔧 [修复文档](./fixes/)
 
@@ -73,10 +74,10 @@
 
 ## 📊 文档统计
 
-- **使用说明文档**: 6 篇
+- **使用说明文档**: 7 篇
 - **修复文档**: 10 篇
 - **API 文档**: 2 篇
-- **总计**: 18 篇
+- **总计**: 19 篇
 
 ---
 

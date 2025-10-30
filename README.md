@@ -82,6 +82,67 @@ flutter pub get
 flutter run
 ```
 
+## 🏗️ 构建发布版本
+
+项目提供了便捷的构建脚本和 Makefile 命令。
+
+### macOS DMG 安装包 (.dmg)
+
+**方法 1：使用 Makefile（推荐）**
+```bash
+make build-macos-dmg
+```
+
+**方法 2：直接运行脚本**
+```bash
+./scripts/build_macos_dmg.sh
+```
+
+构建完成后，DMG 文件位置：`build/macos/wallpaper_unsplash_macos.dmg`
+
+### 其他平台
+
+```bash
+# Android APK
+make build-android
+# 或
+flutter build apk --release
+
+# iOS
+make build-ios
+# 或
+flutter build ios --release
+
+# macOS .app (不打包 DMG)
+make build-macos
+# 或
+flutter build macos --release
+```
+
+### Makefile 命令列表
+
+```bash
+make help              # 显示所有可用命令
+make clean             # 清理构建文件
+make get               # 获取依赖
+make run-macos         # 运行 macOS 应用
+make build-macos-dmg   # 构建 macOS DMG 安装包 ⭐
+make check-arch        # 检查应用支持的 CPU 架构
+```
+
+### 关于 Intel 和 Apple Silicon 支持
+
+✨ **好消息**：默认构建的 DMG 是 **Universal Binary（通用二进制）**
+
+- ✅ **同一个 DMG 同时支持 Intel 和 M 芯片（M1/M2/M3）**
+- ✅ 无需分别打包
+- ✅ 系统会自动选择对应架构运行
+
+验证架构支持：
+```bash
+make check-arch
+```
+
 ## 📦 Flutter 组件与依赖
 
 ### 核心依赖包
