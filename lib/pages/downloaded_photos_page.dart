@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
 import 'dart:convert';
-import '../models/unsplash_photo.dart';
-import '../services/theme_manager.dart';
+import '../data/models/unsplash_photo.dart';
+import '../app/theme/theme_manager.dart';
 import 'photo_detail_page.dart';
 
 /// 已下载图片页面
 ///
 /// 显示所有已下载的图片，支持查看和删除
 class DownloadedPhotosPage extends StatefulWidget {
-  /// 主题管理器
-  final ThemeManager themeManager;
-
-  const DownloadedPhotosPage({super.key, required this.themeManager});
+  const DownloadedPhotosPage({super.key});
 
   @override
   State<DownloadedPhotosPage> createState() => _DownloadedPhotosPageState();
@@ -205,14 +203,7 @@ class _DownloadedPhotosPageState extends State<DownloadedPhotosPage> {
       child: InkWell(
         onTap: () {
           // 点击查看图片详情
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => PhotoDetailPage(
-                photo: photo,
-                themeManager: widget.themeManager,
-              ),
-            ),
-          );
+          Get.to(() => PhotoDetailPage(photo: photo));
         },
         child: Stack(
           fit: StackFit.expand,

@@ -2,18 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart'
     show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:cached_network_image/cached_network_image.dart';
-import '../services/unsplash_service.dart';
-import '../services/theme_manager.dart';
-import '../models/unsplash_photo.dart';
-import '../models/photo_category.dart';
+import 'package:get/get.dart';
+import '../data/services/unsplash_service.dart';
+import '../app/theme/theme_manager.dart';
+import '../data/models/unsplash_photo.dart';
+import '../data/models/photo_category.dart';
 import 'photo_detail_page.dart';
 
 /// 首页 - 图片墙界面
 class HomePage extends StatefulWidget {
-  /// 主题管理器
-  final ThemeManager themeManager;
-
-  const HomePage({super.key, required this.themeManager});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -203,17 +201,20 @@ class _HomePageState extends State<HomePage> {
         elevation: 0,
         actions: [
           // 主题切换按钮
-          IconButton(
-            icon: Icon(
-              widget.themeManager.themeMode == ThemeMode.dark
-                  ? Icons.light_mode
-                  : widget.themeManager.themeMode == ThemeMode.light
-                  ? Icons.dark_mode
-                  : Icons.brightness_auto,
-            ),
-            onPressed: () => widget.themeManager.toggleThemeMode(),
-            tooltip: '切换主题',
-          ),
+          Obx(() {
+            final themeManager = Get.find<ThemeManager>();
+            return IconButton(
+              icon: Icon(
+                themeManager.themeMode == ThemeMode.dark
+                    ? Icons.light_mode
+                    : themeManager.themeMode == ThemeMode.light
+                    ? Icons.dark_mode
+                    : Icons.brightness_auto,
+              ),
+              onPressed: () => themeManager.toggleThemeMode(),
+              tooltip: '切换主题',
+            );
+          }),
         ],
       ),
       body: Column(
@@ -364,14 +365,7 @@ class _HomePageState extends State<HomePage> {
     return GestureDetector(
       onTap: () {
         debugPrint('点击照片: ${photo.id}');
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => PhotoDetailPage(
-              photo: photo,
-              themeManager: widget.themeManager,
-            ),
-          ),
-        );
+        Get.to(() => PhotoDetailPage(photo: photo));
       },
       child: Hero(
         tag: photo.id,

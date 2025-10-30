@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import '../services/unsplash_service.dart';
-import '../services/theme_manager.dart';
-import '../models/unsplash_photo.dart';
+import 'package:get/get.dart';
+import '../data/services/unsplash_service.dart';
+import '../app/theme/theme_manager.dart';
+import '../app/routes/app_routes.dart';
+import '../data/models/unsplash_photo.dart';
 
 /// 欢迎页面
 /// 显示随机 Unsplash 图片作为背景，提供确认按钮进入首页
 class WelcomePage extends StatefulWidget {
-  /// 主题管理器
-  final ThemeManager themeManager;
-
-  const WelcomePage({super.key, required this.themeManager});
+  const WelcomePage({super.key});
 
   @override
   State<WelcomePage> createState() => _WelcomePageState();
@@ -73,7 +72,7 @@ class _WelcomePageState extends State<WelcomePage> {
 
   /// 进入首页
   void _enterHomePage() {
-    Navigator.of(context).pushReplacementNamed('/home');
+    Get.offNamed(AppRoutes.home);
   }
 
   @override
@@ -258,22 +257,26 @@ class _WelcomePageState extends State<WelcomePage> {
 
   /// 构建主题切换按钮
   Widget _buildThemeToggleButton() {
+    final themeManager = Get.find<ThemeManager>();
+
     return Material(
       color: Colors.black.withValues(alpha: 0.3),
       borderRadius: BorderRadius.circular(25),
       child: InkWell(
-        onTap: () => widget.themeManager.toggleThemeMode(),
+        onTap: () => themeManager.toggleThemeMode(),
         borderRadius: BorderRadius.circular(25),
         child: Container(
           padding: const EdgeInsets.all(12),
-          child: Icon(
-            widget.themeManager.themeMode == ThemeMode.dark
-                ? Icons.light_mode
-                : widget.themeManager.themeMode == ThemeMode.light
-                ? Icons.dark_mode
-                : Icons.brightness_auto,
-            color: Colors.white,
-            size: 24,
+          child: Obx(
+            () => Icon(
+              themeManager.themeMode == ThemeMode.dark
+                  ? Icons.light_mode
+                  : themeManager.themeMode == ThemeMode.light
+                  ? Icons.dark_mode
+                  : Icons.brightness_auto,
+              color: Colors.white,
+              size: 24,
+            ),
           ),
         ),
       ),

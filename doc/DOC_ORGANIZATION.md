@@ -6,8 +6,9 @@
 
 ```
 doc/
-├── README.md                          # 文档中心索引（新建）
+├── README.md                          # 文档中心索引
 ├── api/                               # API 接口文档
+│   ├── API_REFERENCE.md              # API 接口参考
 │   └── UNSPLASH_API_SETUP.md         # Unsplash API 配置指南
 ├── fixes/                             # 修复文档（10篇）
 │   ├── APP_NAME_UPDATE.md            # 应用名称更新
@@ -20,23 +21,30 @@ doc/
 │   ├── WEB_IMAGE_LOADING_FIX.md      # Web 图片加载修复
 │   ├── WEB_IMAGE_NOT_LOADING_FIX.md  # Web 图片不加载修复
 │   └── WEB_PLATFORM_FIX.md           # Web 平台修复
-└── guides/                            # 使用说明文档（6篇）
-    ├── DOWNLOAD_FEATURE.md           # 下载功能说明
-    ├── HOME_PAGE_FEATURES.md         # 首页功能说明
-    ├── HOME_PAGE_IMPROVEMENTS.md     # 首页改进记录
-    ├── IMPLEMENTATION_SUMMARY.md     # 实现总结
-    ├── PHOTO_DETAIL_PAGE.md          # 图片详情页说明
-    └── PROJECT_OVERVIEW.md           # 项目概览
+├── guides/                            # 使用说明文档（7篇）
+│   ├── BUILD_DMG_GUIDE.md            # macOS DMG 构建指南
+│   ├── DOWNLOAD_FEATURE.md           # 下载功能说明
+│   ├── HOME_PAGE_FEATURES.md         # 首页功能说明
+│   ├── HOME_PAGE_IMPROVEMENTS.md     # 首页改进记录
+│   ├── IMPLEMENTATION_SUMMARY.md     # 实现总结
+│   ├── PHOTO_DETAIL_PAGE.md          # 图片详情页说明
+│   └── PROJECT_OVERVIEW.md           # 项目概览
+└── refactor/                          # 重构文档（4篇）
+    ├── ENV_SETUP.md                  # 环境配置说明
+    ├── REFACTOR_COMPLETE.md          # 重构完成报告
+    ├── REFACTOR_PLAN.md              # 重构计划
+    └── REFACTOR_SUMMARY.md           # 重构总结
 ```
 
 ## 📊 文档分类统计
 
 | 分类 | 数量 | 说明 |
 |------|------|------|
-| **API 文档** | 1 篇 | 第三方服务接成文档 |
+| **API 文档** | 2 篇 | 第三方服务接口文档 |
 | **修复文档** | 10 篇 | 问题排查和解决方案 |
-| **使用说明** | 6 篇 | 功能介绍和开发指南 |
-| **总计** | **17 篇** | + 1 篇索引文档 |
+| **使用说明** | 7 篇 | 功能介绍和开发指南 |
+| **重构文档** | 4 篇 | 项目重构记录和规范 |
+| **总计** | **23 篇** | + 1 篇索引文档 |
 
 ## 🔄 文档迁移记录
 
@@ -62,6 +70,12 @@ doc/
 - `IMPLEMENTATION_SUMMARY.md` → `doc/guides/IMPLEMENTATION_SUMMARY.md`
 - `PHOTO_DETAIL_PAGE.md` → `doc/guides/PHOTO_DETAIL_PAGE.md`
 - `PROJECT_OVERVIEW.md` → `doc/guides/PROJECT_OVERVIEW.md`
+
+### 从根目录迁移到 `doc/refactor/`（新增）
+- `ENV_SETUP.md` → `doc/refactor/ENV_SETUP.md`
+- `REFACTOR_COMPLETE.md` → `doc/refactor/REFACTOR_COMPLETE.md`
+- `REFACTOR_PLAN.md` → `doc/refactor/REFACTOR_PLAN.md`
+- `REFACTOR_SUMMARY.md` → `doc/refactor/REFACTOR_SUMMARY.md`
 
 ### 根目录保留
 - `README.md` - 项目主入口文档（已更新文档链接）
@@ -94,6 +108,7 @@ doc/
 - **API 接口文档** → `doc/api/`
 - **问题修复记录** → `doc/fixes/`
 - **功能说明文档** → `doc/guides/`
+- **重构相关文档** → `doc/refactor/`
 
 并更新 `doc/README.md` 索引。
 

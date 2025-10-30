@@ -43,12 +43,23 @@
 - [**Unsplash API 设置**](./api/UNSPLASH_API_SETUP.md) - Unsplash API 配置和使用指南
 - [**API 接口参考**](./api/API_REFERENCE.md) - 完整的 API 接口文档和使用示例
 
+### 🔄 [重构文档](./refactor/)
+
+项目重构记录和规范：
+
+- [**环境配置说明**](./refactor/ENV_SETUP.md) - .env 文件配置指南
+- [**重构计划**](./refactor/REFACTOR_PLAN.md) - 详细的重构计划和分析
+- [**重构总结**](./refactor/REFACTOR_SUMMARY.md) - 重构内容和成果总结
+- [**重构完成报告**](./refactor/REFACTOR_COMPLETE.md) - 完整的重构报告和使用说明
+
 ## 🚀 快速开始
 
-1. 先阅读 [项目概览](./guides/PROJECT_OVERVIEW.md) 了解项目整体架构
-2. 查看 [Unsplash API 设置](./api/UNSPLASH_API_SETUP.md) 配置 API 密钥
-3. 参考 [使用说明文档](./guides/) 了解各功能模块
-4. 遇到问题时查阅 [修复文档](./fixes/) 寻找解决方案
+1. **⚠️ 必读**：先查看 [环境配置说明](./refactor/ENV_SETUP.md) 配置 .env 文件
+2. 阅读 [项目概览](./guides/PROJECT_OVERVIEW.md) 了解项目整体架构
+3. 查看 [Unsplash API 设置](./api/UNSPLASH_API_SETUP.md) 配置 API 密钥
+4. 参考 [使用说明文档](./guides/) 了解各功能模块
+5. 遇到问题时查阅 [修复文档](./fixes/) 寻找解决方案
+6. 了解重构内容请查看 [重构文档](./refactor/)
 
 ## 📝 文档分类说明
 
@@ -57,6 +68,7 @@
 | **guides/** | 功能说明、开发指南 | 了解功能、学习实现 |
 | **fixes/** | 问题修复记录 | 排查问题、学习经验 |
 | **api/** | API 接口文档 | 集成第三方服务 |
+| **refactor/** | 重构文档和规范 | 了解项目架构和代码规范 |
 
 ## 🔍 常见问题速查
 
@@ -77,7 +89,8 @@
 - **使用说明文档**: 7 篇
 - **修复文档**: 10 篇
 - **API 文档**: 2 篇
-- **总计**: 19 篇
+- **重构文档**: 4 篇
+- **总计**: 23 篇
 
 ---
 

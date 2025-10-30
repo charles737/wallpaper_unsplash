@@ -45,7 +45,8 @@ wallpaper_unsplash/
 │   ├── README.md                     # 文档中心索引
 │   ├── api/                          # API 接口文档
 │   ├── fixes/                        # 问题修复文档
-│   └── guides/                       # 使用说明文档
+│   ├── guides/                       # 使用说明文档
+│   └── refactor/                     # 重构文档
 ├── pubspec.yaml                      # 项目依赖配置
 └── README.md                         # 项目说明文档
 ```
@@ -65,16 +66,28 @@ cd wallpaper_unsplash
 flutter pub get
 ```
 
-### 3. 配置 Unsplash API Key
+### 3. 配置环境变量和 API Key
 
-⚠️ **必须配置 API Key 才能运行**
+⚠️ **必须配置才能运行**
+
+**第一步：配置 .env 文件**
+
+在项目根目录创建 `.env` 文件并添加您的 API Key：
+
+```dotenv
+UNSPLASH_ACCESS_KEY=你的_Unsplash_Access_Key
+```
+
+详细说明请参考 [环境配置文档](./doc/refactor/ENV_SETUP.md)
+
+**第二步：获取 Unsplash API Key**
 
 请参考 [Unsplash API 设置文档](./doc/api/UNSPLASH_API_SETUP.md) 获取详细配置说明。
 
 简要步骤：
 1. 访问 [Unsplash Developers](https://unsplash.com/developers) 注册应用
 2. 获取 Access Key
-3. 修改 `lib/services/unsplash_service.dart` 中的 `_accessKey` 常量
+3. 将 Access Key 添加到 `.env` 文件
 
 ### 4. 运行应用
 
@@ -206,6 +219,13 @@ make check-arch
 - 📖 [使用说明文档](./doc/guides/) - 功能介绍和开发指南
 - 🔧 [修复文档](./doc/fixes/) - 问题排查和解决方案
 - 🌐 [API 接口文档](./doc/api/) - 第三方服务集成
+- 🔄 [重构文档](./doc/refactor/) - 项目重构记录和规范
+
+### ⚠️ 重要文档（必读）
+
+**新项目启动必看：**
+1. [环境配置说明](./doc/refactor/ENV_SETUP.md) - 配置 .env 文件
+2. [重构完成报告](./doc/refactor/REFACTOR_COMPLETE.md) - 了解最新的项目架构
 
 ## 📄 API 接口文档
 

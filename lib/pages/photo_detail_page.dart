@@ -6,9 +6,10 @@ import 'package:share_plus/share_plus.dart';
 import 'package:saver_gallery/saver_gallery.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
 import 'dart:convert';
-import '../models/unsplash_photo.dart';
-import '../services/theme_manager.dart';
+import '../data/models/unsplash_photo.dart';
+import '../app/theme/theme_manager.dart';
 import 'downloaded_photos_page.dart';
 import 'dart:typed_data';
 // 条件导入：根据平台选择不同的下载实现
@@ -22,14 +23,7 @@ class PhotoDetailPage extends StatefulWidget {
   /// 照片对象
   final UnsplashPhoto photo;
 
-  /// 主题管理器
-  final ThemeManager themeManager;
-
-  const PhotoDetailPage({
-    super.key,
-    required this.photo,
-    required this.themeManager,
-  });
+  const PhotoDetailPage({super.key, required this.photo});
 
   @override
   State<PhotoDetailPage> createState() => _PhotoDetailPageState();
@@ -294,13 +288,7 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
                 title: const Text('已下载'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => DownloadedPhotosPage(
-                        themeManager: widget.themeManager,
-                      ),
-                    ),
-                  );
+                  Get.to(() => const DownloadedPhotosPage());
                 },
               ),
               const Divider(height: 1),
@@ -344,18 +332,21 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
               ),
               actions: [
                 // 主题切换按钮
-                IconButton(
-                  icon: Icon(
-                    widget.themeManager.themeMode == ThemeMode.dark
-                        ? Icons.light_mode
-                        : widget.themeManager.themeMode == ThemeMode.light
-                        ? Icons.dark_mode
-                        : Icons.brightness_auto,
-                    color: Colors.white,
-                  ),
-                  onPressed: () => widget.themeManager.toggleThemeMode(),
-                  tooltip: '切换主题',
-                ),
+                Obx(() {
+                  final themeManager = Get.find<ThemeManager>();
+                  return IconButton(
+                    icon: Icon(
+                      themeManager.themeMode == ThemeMode.dark
+                          ? Icons.light_mode
+                          : themeManager.themeMode == ThemeMode.light
+                          ? Icons.dark_mode
+                          : Icons.brightness_auto,
+                      color: Colors.white,
+                    ),
+                    onPressed: () => themeManager.toggleThemeMode(),
+                    tooltip: '切换主题',
+                  );
+                }),
                 // 下载按钮
                 _isDownloading
                     ? Padding(
@@ -414,21 +405,18 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
 
         // 第二层：小图占位符（仅在大图未加载完成时显示）
         if (!_isHighResLoaded)
-          Hero(
-            tag: '${widget.photo.id}_placeholder',
-            child: CachedNetworkImage(
-              // 使用与主页相同的 URL，确保命中缓存，立即显示
-              imageUrl: '${widget.photo.urls.small}&w=208&h=288&fit=crop',
-              fit: BoxFit.contain, // 保持宽高比，居中显示
-              placeholder: (context, url) => Center(
-                child: CircularProgressIndicator(
-                  color: Theme.of(context).primaryColor,
-                  strokeWidth: 2,
-                ),
+          CachedNetworkImage(
+            // 使用与主页相同的 URL，确保命中缓存，立即显示
+            imageUrl: '${widget.photo.urls.small}&w=208&h=288&fit=crop',
+            fit: BoxFit.contain, // 保持宽高比，居中显示
+            placeholder: (context, url) => Center(
+              child: CircularProgressIndicator(
+                color: Theme.of(context).primaryColor,
+                strokeWidth: 2,
               ),
-              errorWidget: (context, url, error) =>
-                  Container(color: Colors.black),
             ),
+            errorWidget: (context, url, error) =>
+                Container(color: Colors.black),
           ),
 
         // 第三层：高清大图 PhotoView
